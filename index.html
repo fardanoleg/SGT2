@@ -1,51 +1,55 @@
 <!doctype html>
-<html>
+<html ng-app="myApp">
 <head>
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
     <script src="script.js"></script>
     <meta name="viewport" content="initial-scale=1, user-scalable=no">
 </head>
 <body>
-<div class="container">
+<div class="container" ng-controller="myController as mc">
     <div class="row">
         <!-- only show this element when the isnt on mobile -->
         <h1 class="hidden-xs">Student Grade Table
-            <small class="col-md-offset-5">Grade Average : <span class="label label-default avgGrade"></span></small>
+            <small class="col-md-offset-5">Grade Average : <span class="label label-default avgGrade">{{mc.average + "%"}}</span>
+            </small>
         </h1>
         <!-- only show this element when the user gets to a mobile version -->
         <h3 class="hidden-sm hidden-md hidden-lg">Student Grade Table
-            <small class="col-xs-offset-7">Grade Average : <span class="label label-default avgGrade"></span></small>
+            <small class="col-xs-offset-7">Grade Average : <span class="label label-default avgGrade">{{mc.average + "%"}}</span>
+            </small>
         </h3>
     </div>
-    <div class="row col-md-3 col-md-push-9 student-add-form">
+    <div class="row col-md-3 col-md-push-9 student-add-form" ng-controller="formController as fc">
         <h4>Add Student</h4>
         <div class="input-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-user"></span>
             </span>
-            <input type="text" class="form-control" name="studentName" id="studentName" placeholder="Student Name">
+            <input type="text" class="form-control" name="studentName" id="studentName" placeholder="Student Name"
+                   ng-model="mc.studentName">
         </div>
         <div class="input-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-list-alt "></span>
             </span>
-            <input type="text" class="form-control" name="course" id="course"
-                   placeholder="Student Course">
+            <input type="text" class="form-control" name="course" id="course" placeholder="Student Course"
+                   ng-model="mc.studentCourse">
         </div>
         <div class="input-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-education "></span>
             </span>
-            <input type="text" class="form-control" name="studentGrade" id="studentGrade"
-                   placeholder="Student Grade">
+            <input type="text" class="form-control" name="studentGrade" id="studentGrade" placeholder="Student Grade"
+                   ng-model="mc.studentGrade">
         </div>
-        <button type="button" class="btn btn-success" onclick="addClicked()">Add</button>
-        <button type="button" class="btn btn-default" onclick="cancelClicked()">Cancel</button>
-        <button type="button" class="btn btn-warning" onclick="getDataServer()">Get Data</button>
+        <button type="button" class="btn btn-success" ng-click="mc.addClicked()">Add</button>
+        <button type="button" class="btn btn-default" ng-click="mc.cancelClicked()">Cancel</button>
+        <button type="button" class="btn btn-warning" ng-click="mc.getDataServer()">Get Data</button>
     </div>
-    <div class="row col-md-9 col-md-pull-3 student-list-container">
+    <div class="row col-md-9 col-md-pull-3 student-list-container" ng-controller="bodyController as bc">
         <!--<table class="student-list">-->
         <table class="table">
             <thead>
@@ -56,8 +60,14 @@
                 <th>Operations</th>
             </tr>
             </thead>
-            <tbody class="table_body">
+            <tbody class="table_body" ng-repeat="s in mc.studentArray">
             <tr>
+                <td>{{s.name}}</td>
+                <td>{{s.course}}</td>
+                <td>{{s.grade}}</td>
+                <td>
+                    <button type='button' class='btn btn-danger' ng-click="mc.deletStudentFromDataBase($index)">Delet</button>
+                </td>
             </tr>
             </tbody>
         </table>
