@@ -1,8 +1,10 @@
 var app = angular.module('myApp', []);
 
-// app.config(function(myProviderProvider){
-//     myProviderProvider.config.headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-// });
+app.config(function ($httpProvider) {
+    $httpProvider.defaults.headers.post = {'Content-Type': 'application/x-www-form-urlencoded'};
+    $httpProvider.defaults.cache = false;
+    $httpProvider.defaults.datatype = "json";
+});
 
 
 app.factory("myFactory", function ($http) {
@@ -11,12 +13,12 @@ app.factory("myFactory", function ($http) {
 
     server.getDataServer = function () {                            //get data from the server
         $http({
-            datatype: "json",
+            // datatype: "json",
             data: $.param({api_key: "Yd2V1lB6e5"}),
             method: "post",
-            url: 'http://s-apis.learningfuze.com/sgt/get',
-            cache: false,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            url: 'http://s-apis.learningfuze.com/sgt/get'
+            // cache: false,
+            // headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         })
             .then(
                 function (response) {
@@ -26,11 +28,11 @@ app.factory("myFactory", function ($http) {
     };
     server.addStudentToDataBase = function (Data) {        //add student to the database on the server
         $http({
-            datatype: "json",
+            // datatype: "json",
             method: "post",
-            url: 'http://s-apis.learningfuze.com/sgt/create?api_key=Yd2V1lB6e5',
-            cache: false,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: 'http://s-apis.learningfuze.com/sgt/create',
+            // cache: false,
+            // headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: $.param({
                 api_key: "Yd2V1lB6e5",
                 name: Data.name,
@@ -40,7 +42,7 @@ app.factory("myFactory", function ($http) {
         })
             .then(
                 function (response) {
-                    var obj={};
+                    var obj = {};
                     console.log(response);
                     obj.id = response.data.new_id;
                     obj.name = Data.name;
@@ -56,11 +58,11 @@ app.factory("myFactory", function ($http) {
         var item = server.studentArray[index];
         console.log('item', item);
         $http({
-            dataType: 'json',
+            // dataType: 'json',
             method: "post",
             url: 'http://s-apis.learningfuze.com/sgt/delete',
-            cache: false,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            // cache: false,
+            // headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             data: $.param({
                 api_key: "Yd2V1lB6e5",
                 student_id: item.id
