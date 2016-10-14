@@ -5,20 +5,20 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
-    <script src="script.js"></script>
+
     <meta name="viewport" content="initial-scale=1, user-scalable=no">
 </head>
 <body>
-<div class="container" ng-controller="myController as mc">
+<div class="container" ng-controller="appController as ac">
     <div class="row">
         <!-- only show this element when the isnt on mobile -->
         <h1 class="hidden-xs">Student Grade Table
-            <small class="col-md-offset-5">Grade Average : <span class="label label-default avgGrade">{{mc.calculateAverage() + "%"}}</span>
+            <small class="col-md-offset-5">Grade Average : <span class="label label-default avgGrade">{{ac.calculateAverage() + "%"}}</span>
             </small>
         </h1>
         <!-- only show this element when the user gets to a mobile version -->
         <h3 class="hidden-sm hidden-md hidden-lg">Student Grade Table
-            <small class="col-xs-offset-7">Grade Average : <span class="label label-default avgGrade">{{mc.calculateAverage() + "%"}}</span>
+            <small class="col-xs-offset-7">Grade Average : <span class="label label-default avgGrade">{{ac.calculateAverage() + "%"}}</span>
             </small>
         </h3>
     </div>
@@ -48,8 +48,30 @@
         <button type="button" class="btn btn-success" ng-click="fc.addClicked()">Add</button>
         <button type="button" class="btn btn-default" ng-click="fc.cancelClicked()">Cancel</button>
         <button type="button" class="btn btn-warning" ng-click="fc.getDataServer()">Get Data</button>
+        <hr>
+        <h4>Sort By</h4>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-sort-by-alphabet"></span>
+            </span>
+            <select class="form-control" ng-model="sortBy">
+                <option value="">Order Added</option>
+                <option value="name">Name</option>
+                <option value="course">Course</option>
+                <option value="grade">Grade</option>
+            </select>
+        </div>
+        <h4>Search</h4>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-search"></span>
+            </span>
+            <input type="text" class="form-control" ng-model="search" placeholder="Search Table">
+        </div>
+
     </div>
-    <div class="row col-md-9 col-md-pull-3 student-list-container" ng-controller="bodyController as bc">
+
+    <div class="row col-md-9 col-md-pull-3 student-list-container" ng-controller="tableController as tc">
         <!--<table class="student-list">-->
         <table class="table">
             <thead>
@@ -60,19 +82,25 @@
                 <th>Operations</th>
             </tr>
             </thead>
-            <tbody class="table_body" ng-repeat="s in bc.studentArray()">
+            <tbody class="table_body" ng-repeat="s in tc.studentArray() | filter: search | orderBy: sortBy">
             <tr>
                 <td>{{s.name}}</td>
                 <td>{{s.course}}</td>
                 <td>{{s.grade}}</td>
                 <td>
-                    <button type='button' class='btn btn-danger' ng-click="bc.deletStudentFromDataBase($index)">Delet</button>
+                    <button type='button' class='btn btn-danger' ng-click="tc.deletStudentFromDataBase($index)">Delet
+                    </button>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
+<script src="sgtApp.js"></script>
+<script src="script.js"></script>
+<script src="appController.js"></script>
+<script src="formController.js"></script>
+<script src="tableController.js"></script>
 </body>
 </html>
 

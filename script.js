@@ -1,4 +1,4 @@
-var app = angular.module('myApp', []);
+// var app = angular.module('myApp', []);
 
 app.config(function ($httpProvider) {
     $httpProvider.defaults.headers.post = {'Content-Type': 'application/x-www-form-urlencoded'};
@@ -7,134 +7,85 @@ app.config(function ($httpProvider) {
 });
 
 
-app.factory("myFactory", function ($http) {
+app.factory("myFactory", function ($http, $log, $q) {
     var server = {};
     server.studentArray = [];
+    var baseUrl = 'http://s-apis.learningfuze.com/sgt/';
+    var apiKey = 'Yd2V1lB6e5';
 
-    server.getDataServer = function () {                            //get data from the server
-        $http({
-            // datatype: "json",
-            data: $.param({api_key: "Yd2V1lB6e5"}),
-            method: "post",
-            url: 'http://s-apis.learningfuze.com/sgt/get'
-            // cache: false,
-            // headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+    server.httpRequest = function (url, data) {  //method to call and return $http
+        $log.info("request$http running ");
+        return $http({
+            method: 'post',
+            url: url,
+            data: $.param(data)
         })
-            .then(
-                function (response) {
-                    console.log(response);
-                    server.studentArray = response.data.data;
-                });
+    };
+    server.getData = function () {                            //get data from the server
+        var url = baseUrl + 'get';
+        var sendData = {api_key: apiKey};
+        var defer = $q.defer();
+        server.httpRequest(url, sendData)
+            .then(function (response) {
+                $log.info('Data received: ', response);
+                defer.resolve(response.data.data);
+                server.studentArray = response.data.data;
+                $log.info('Array: ', server.studentArray);
+            });
+        return defer.promise;
+
     };
     server.addStudentToDataBase = function (Data) {        //add student to the database on the server
-        $http({
-            // datatype: "json",
-            method: "post",
-            url: 'http://s-apis.learningfuze.com/sgt/create',
-            // cache: false,
-            // headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: $.param({
-                api_key: "Yd2V1lB6e5",
-                name: Data.name,
-                course: Data.course,
-                grade: Data.grade
-            })
-        })
-            .then(
-                function (response) {
-                    var obj = {};
-                    console.log(response);
-                    obj.id = response.data.new_id;
-                    obj.name = Data.name;
-                    obj.course = Data.course;
-                    obj.grade = Data.grade;
-                    server.studentArray.push(obj);
+        var url = baseUrl + 'create';
+        var sendData = {
+            api_key: apiKey,
+            name: Data.name,
+            course: Data.course,
+            grade: Data.grade
+        };
+        var defer = $q.defer();
+        server.httpRequest(url, sendData)
+            .then(function (response) {
+                $log.info("Data when adding: ", response);
 
-                    console.log(server.studentArray);
-                })
+                var obj = {};                          // creating object yo store key value pair and store in the array (the reason to display)
+                obj.id = response.data.new_id;
+                obj.name = Data.name;
+                obj.course = Data.course;
+                obj.grade = Data.grade;
+                server.studentArray.push(obj);
+                $log.info('New array after adding items: ', server.studentArray);
+                defer.resolve(response.data.new_id);
+            });
+        return defer.promise;
     };
-
     server.deletStudentFromDataBase = function (index) {              // delet student from the databse, from the server
+        var url = baseUrl + 'delete';
+        var defer = $q.defer();
         var item = server.studentArray[index];
-        console.log('item', item);
-        $http({
-            // dataType: 'json',
-            method: "post",
-            url: 'http://s-apis.learningfuze.com/sgt/delete',
-            // cache: false,
-            // headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            data: $.param({
-                api_key: "Yd2V1lB6e5",
-                student_id: item.id
-            })
-        })
-            .then(
-                function (response) {
-                    console.log('success call: ', response);
+        var sendData = {
+            api_key: apiKey,
+            student_id: item.id
+        };
+        $log.info('Index selected ', item);
+        server.httpRequest(url, sendData)
+            .then(function (response) {
+                $log.info('Data after deleting: ', response.data);
+                if (response.data.success) {
+                    defer.resolve(response.data);
                     server.studentArray.splice(index, 1);
-                    console.log(server.studentArray);
-                    // server.calculateAverage();
-                })
+                    $log.info('new array after deleting: ', server.studentArray);
+                } else {
+                    defer.reject(response.data);
+                    $log.info('You cannto delet');
+                }
+            });
+        return defer.promise;
     };
     return server;
 });
 
-app.controller("myController", function (myFactory) {
-    this.calculateAverage = function () {
-        var average = 0;
-        var total = 0;
-        for (var i = 0; i < myFactory.studentArray.length; i++) {
-            total += parseInt(myFactory.studentArray[i].grade);
-        }
-        average = Math.floor(total / myFactory.studentArray.length);
-        return average
-    };
 
-});
-
-app.controller("formController", function (myFactory) {      //adding
-    var self = this;
-    this.studentName = "";
-    this.studentCourse = "";
-    this.studentGrade = "";
-    this.getDataServer = function () {
-        myFactory.getDataServer();
-    };
-    this.addClicked = function () {                               //add new student to the database
-        if (!isNaN(self.studentName) || isNaN(self.studentGrade)) {
-            console.log("student name is incorrect or student grade is incorrect");
-            return
-        }
-        if (self.studentName === "" || self.studentCourse === "" || self.studentGrade === "") {
-            console.log("you have empty inputs incorrect");
-            return
-        } else {
-            var data = {
-                name: self.studentName,
-                course: self.studentCourse,
-                grade: self.studentGrade
-            };
-            console.log(data);
-        }
-        myFactory.addStudentToDataBase(data);
-        this.cancelClicked();
-    };
-    this.cancelClicked = function () {                            //clear the input forms
-        this.studentName = "";
-        this.studentCourse = "";
-        this.studentGrade = "";
-    };
-});
-
-app.controller("bodyController", function (myFactory) {
-
-    this.studentArray = function () {
-        return myFactory.studentArray;
-    };
-    this.deletStudentFromDataBase = function (index) {
-        myFactory.deletStudentFromDataBase(index);
-    }
-});
 
 
 
